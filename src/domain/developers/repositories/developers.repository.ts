@@ -3,8 +3,10 @@
 // **************************************************************************
 
 import { injectable } from 'inversify';
-import { IDeveloper } from '../types';
+
 import { contracts, developers } from './data';
+
+import type { IDeveloper } from '../types';
 
 @injectable()
 export class DevelopersRepository {

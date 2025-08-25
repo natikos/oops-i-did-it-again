@@ -4,6 +4,7 @@ import typescriptParser from '@typescript-eslint/parser';
 import prettier from 'eslint-plugin-prettier';
 import prettierConfig from 'eslint-config-prettier';
 import globals from 'globals';
+import importPlugin from 'eslint-plugin-import';
 
 export default [
   js.configs.recommended,
@@ -20,16 +21,37 @@ export default [
     plugins: {
       '@typescript-eslint': typescript,
       prettier: prettier,
+      import: importPlugin,
     },
     rules: {
       ...typescript.configs.recommended.rules,
       ...prettierConfig.rules,
       indent: ['error', 2],
+      'prettier/prettier': 'error',
       'no-tabs': 'error',
       'no-mixed-spaces-and-tabs': 'error',
+      '@typescript-eslint/consistent-type-imports': [
+        'error',
+        {
+          prefer: 'type-imports',
+          disallowTypeAnnotations: false,
+        },
+      ],
+      'import/order': [
+        'error',
+        {
+          groups: [
+            ['builtin', 'external'],
+            ['internal'],
+            ['parent', 'sibling'],
+            ['index'],
+            ['object', 'type'],
+          ],
+          'newlines-between': 'always',
+          alphabetize: { order: 'asc', caseInsensitive: true },
+        },
+      ],
     },
-  },
-  {
     ignores: [
       'node_modules/**',
       'build/**',
@@ -39,6 +61,7 @@ export default [
       '*.d.ts',
       '.env*',
       'package-lock.json',
+      'package.json',
     ],
   },
 ];

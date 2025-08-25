@@ -1,8 +1,8 @@
 import { Container } from 'inversify';
 import _ from 'lodash';
 
-import { DevelopersService } from '../domain/developers/services/developers.service';
 import { DevelopersRepository } from '../domain/developers/repositories/developers.repository';
+import { DevelopersService } from '../domain/developers/services/developers.service';
 
 // REST API Controllers
 import '../rest/controllers/developers.controller';

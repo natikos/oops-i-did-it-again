@@ -1,11 +1,13 @@
 import 'reflect-metadata';
-import express from 'express';
 import bodyParser from 'body-parser';
-import { InversifyExpressServer } from 'inversify-express-utils';
-import { createContainer } from './container/container';
+import express from 'express';
 import { engine } from 'express-handlebars';
+import { InversifyExpressServer } from 'inversify-express-utils';
 import path from 'node:path';
-import { Container, interfaces } from 'inversify';
+
+import { createContainer } from './container/container';
+
+import type { Container, interfaces } from 'inversify';
 
 export class Application {
   private expressApp: express.Express;
@@ -13,6 +15,7 @@ export class Application {
   private container: Container | interfaces.Container;
 
   constructor(options: IApplicationOptions = {}) {
+    console.log('ds');
     this.container = options.container || null;
   }
 

@@ -1,13 +1,14 @@
+import { inject } from 'inversify';
 import {
-  interfaces,
   controller,
   BaseHttpController,
   httpGet,
   requestParam,
 } from 'inversify-express-utils';
-import { inject } from 'inversify';
-import { DevelopersService } from '../../domain/developers/services/developers.service';
-import { DeveloperDto } from '../dto/developers.responses.dto';
+
+import type { DevelopersService } from '../../domain/developers/services/developers.service';
+import type { DeveloperDto } from '../dto/developers.responses.dto';
+import type { interfaces } from 'inversify-express-utils';
 
 @controller('/api/developers')
 // @ApiPath(path)

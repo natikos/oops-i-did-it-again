@@ -1,6 +1,7 @@
 import { inject, injectable } from 'inversify';
-import { DevelopersRepository } from '../repositories/developers.repository';
-import { IDeveloper } from '../types';
+
+import type { DevelopersRepository } from '../repositories/developers.repository';
+import type { IDeveloper } from '../types';
 
 @injectable()
 export class DevelopersService {

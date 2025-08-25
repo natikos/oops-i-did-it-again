@@ -1,0 +1,5 @@
+echo "🔍 Running validate staged files..."
+npm run validate-staged
+
+echo "✅ Running TypeScript build check..."
+npm run build

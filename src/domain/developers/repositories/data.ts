@@ -1,4 +1,4 @@
-import { IDeveloper } from '../types';
+import type { IDeveloper } from '../types';
 
 export const contracts = [
   {
