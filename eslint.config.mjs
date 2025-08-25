@@ -24,15 +24,9 @@ export default [
     rules: {
       ...typescript.configs.recommended.rules,
       ...prettierConfig.rules,
-      'prettier/prettier': 'error',
-      '@typescript-eslint/no-unused-vars': 'warn',
-      '@typescript-eslint/no-explicit-any': 'off',
-      '@typescript-eslint/explicit-function-return-type': 'off',
-      '@typescript-eslint/explicit-module-boundary-types': 'off',
-      '@typescript-eslint/no-inferrable-types': 'off',
-      'no-console': 'warn',
-      'no-debugger': 'error',
-      'no-unused-vars': 'off',
+      indent: ['error', 2],
+      'no-tabs': 'error',
+      'no-mixed-spaces-and-tabs': 'error',
     },
   },
   {
