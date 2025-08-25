@@ -5,12 +5,6 @@ import {
   httpGet,
   requestParam,
 } from 'inversify-express-utils';
-// import { ApiOperationGet, ApiPath } from 'swagger-express-ts';
-import {
-  path,
-  getDevelopers,
-  getDeveloperById,
-} from '../swagger/developers.swagger.docs';
 import { inject } from 'inversify';
 import { DevelopersService } from '../../domain/developers/services/developers.service';
 import { DeveloperDto } from '../dto/developers.responses.dto';

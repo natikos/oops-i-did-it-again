@@ -55,11 +55,13 @@ export const createContainerWithOverrides = (overrides: IContainerOverrides) =>
 
 export type BindingType = 'to' | 'toConstantValue';
 export interface IContainerOverrides {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: { [key in BindingType]?: any };
 }
 
 export interface ICreateContainerOptions {
   mergeContainer?: Container;
   overrides?: IContainerOverrides;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   applicableMiddleware?: { apply: any };
 }

@@ -1,6 +1,6 @@
-import { ISwaggerBuildDefinition } from 'swagger-express-ts/swagger.builder';
+// import { ISwaggerBuildDefinition } from 'swagger-express-ts/swagger.builder';
 
-export const generalDoc: ISwaggerBuildDefinition = {
+export const generalDoc = {
   info: {
     title: 'Lemon API',
     version: `1.0.0`,

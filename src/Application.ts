@@ -3,14 +3,12 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import { InversifyExpressServer } from 'inversify-express-utils';
 import { createContainer } from './container/container';
-import * as swagger from 'swagger-express-ts';
-import { generalDoc } from './rest/swagger/general.docs';
 import { engine } from 'express-handlebars';
 import path from 'node:path';
 import { Container, interfaces } from 'inversify';
 
 export class Application {
-  private expressApp: Express;
+  private expressApp: express.Express;
   private inversifyServer: InversifyExpressServer;
   private container: Container | interfaces.Container;
 
@@ -32,7 +30,7 @@ export class Application {
   private initExpressApp() {
     const app = express();
     app.all('*', (req, _res, next) => {
-      //@ts-ignore
+      // @ts-expect-error: TODO investigate and fix
       req.container = this.container;
       next();
     });
@@ -57,12 +55,14 @@ export class Application {
           '/api-docs/swagger/assets',
           express.static('node_modules/swagger-ui-dist')
         );
-        app.use(swagger.express({ definition: generalDoc }));
+        // TODO: use swagger
+        // app.use(swagger.express({ definition: generalDoc }));
         app.get('/api-docs/swagger', (_req, res) => {
           res.render('swagger');
         });
       })
       .setErrorConfig((app) => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         app.use((e, _req, res, _next) => {
           res.status(e.statusCode || 500).json({
             error: {
@@ -98,5 +98,6 @@ export class Application {
 }
 
 export interface IApplicationOptions {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   container?: any;
 }
