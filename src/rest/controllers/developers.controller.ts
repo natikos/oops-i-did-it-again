@@ -4,7 +4,7 @@ import {
 	BaseHttpController,
 	httpGet, requestParam
 } from 'inversify-express-utils';
-import { ApiOperationGet, ApiPath } from 'swagger-express-ts';
+// import { ApiOperationGet, ApiPath } from 'swagger-express-ts';
 import {
 	path, getDevelopers, getDeveloperById
 } from '../swagger/developers.swagger.docs';
@@ -13,7 +13,7 @@ import { DevelopersService } from '../../domain/developers/services/developers.s
 import { DeveloperDto } from '../dto/developers.responses.dto'
 
 @controller('/api/developers')
-@ApiPath(path)
+// @ApiPath(path)
 export class DevelopersController extends BaseHttpController implements interfaces.Controller {
 
 	constructor(
@@ -21,13 +21,13 @@ export class DevelopersController extends BaseHttpController implements interfac
 	){ super() }
 
 	@httpGet('/')
-	@ApiOperationGet(getDevelopers)
+	// @ApiOperationGet(getDevelopers)
 	public async getDevelopers(): Promise<DeveloperDto[]> {
 		return this.developersService.getDevelopers()
 	}
 
 	@httpGet('/:id')
-	@ApiOperationGet(getDeveloperById)
+	// @ApiOperationGet(getDeveloperById)
 	public async getDeveloperById(@requestParam('id') id: string): Promise<DeveloperDto> {
 		return this.developersService.getDeveloperById(id)
 	}

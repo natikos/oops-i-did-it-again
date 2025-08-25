@@ -1,5 +1,5 @@
-import { IApiOperationArgsBase } from 'swagger-express-ts/i-api-operation-args.base'
-import { IApiPathArgs } from 'swagger-express-ts/api-path.decorator'
+// import { IApiOperationArgsBase } from 'swagger-express-ts/i-api-operation-args.base'
+// import { IApiPathArgs } from 'swagger-express-ts/api-path.decorator'
 
 export const path: IApiPathArgs = {
 	path: "/api/developers",

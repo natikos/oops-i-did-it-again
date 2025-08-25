@@ -7,7 +7,6 @@ import * as swagger from 'swagger-express-ts'
 import { generalDoc } from './rest/swagger/general.docs'
 import { engine } from 'express-handlebars';
 import path from 'node:path'
-import { Express } from 'express-serve-static-core'
 import { Container, interfaces } from 'inversify'
 
 export class Application {
