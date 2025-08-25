@@ -11,55 +11,55 @@ import '../rest/controllers/developers.controller';
 import '../rest/dto/developers.responses.dto';
 
 export const createContainer = (options: ICreateContainerOptions = {}) => {
-	let container = new Container();
+  let container = new Container();
 
-	// Services
-	container.bind<DevelopersService>('DevelopersService').to(DevelopersService);
+  // Services
+  container.bind<DevelopersService>('DevelopersService').to(DevelopersService);
 
-	// Repositories
-	container
-		.bind<DevelopersRepository>('DevelopersRepository')
-		.to(DevelopersRepository);
+  // Repositories
+  container
+    .bind<DevelopersRepository>('DevelopersRepository')
+    .to(DevelopersRepository);
 
-	for (const serviceIdentifier of _.keys(options.overrides)) {
-		if (container.isBound(serviceIdentifier)) {
-			container.unbind(serviceIdentifier);
-		}
+  for (const serviceIdentifier of _.keys(options.overrides)) {
+    if (container.isBound(serviceIdentifier)) {
+      container.unbind(serviceIdentifier);
+    }
 
-		if (options.overrides[serviceIdentifier].toConstantValue) {
-			container
-				.bind(serviceIdentifier)
-				.toConstantValue(options.overrides[serviceIdentifier].toConstantValue);
-		}
+    if (options.overrides[serviceIdentifier].toConstantValue) {
+      container
+        .bind(serviceIdentifier)
+        .toConstantValue(options.overrides[serviceIdentifier].toConstantValue);
+    }
 
-		if (options.overrides[serviceIdentifier].to) {
-			container
-				.bind(serviceIdentifier)
-				.to(options.overrides[serviceIdentifier].to);
-		}
-	}
+    if (options.overrides[serviceIdentifier].to) {
+      container
+        .bind(serviceIdentifier)
+        .to(options.overrides[serviceIdentifier].to);
+    }
+  }
 
-	const mergedContainer = options.mergeContainer
-		? Container.merge(container, options.mergeContainer)
-		: container;
+  const mergedContainer = options.mergeContainer
+    ? Container.merge(container, options.mergeContainer)
+    : container;
 
-	if (options.applicableMiddleware?.apply) {
-		options.applicableMiddleware.apply(mergedContainer);
-	}
+  if (options.applicableMiddleware?.apply) {
+    options.applicableMiddleware.apply(mergedContainer);
+  }
 
-	return mergedContainer;
+  return mergedContainer;
 };
 
 export const createContainerWithOverrides = (overrides: IContainerOverrides) =>
-	createContainer({ overrides });
+  createContainer({ overrides });
 
 export type BindingType = 'to' | 'toConstantValue';
 export interface IContainerOverrides {
-	[key: string]: { [key in BindingType]?: any };
+  [key: string]: { [key in BindingType]?: any };
 }
 
 export interface ICreateContainerOptions {
-	mergeContainer?: Container;
-	overrides?: IContainerOverrides;
-	applicableMiddleware?: { apply: any };
+  mergeContainer?: Container;
+  overrides?: IContainerOverrides;
+  applicableMiddleware?: { apply: any };
 }

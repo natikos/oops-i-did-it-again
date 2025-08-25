@@ -1,6 +1,6 @@
 export interface IDeveloper {
-	id: string;
-	firstName?: string;
-	lastName?: string;
-	email: string;
+  id: string;
+  firstName?: string;
+  lastName?: string;
+  email: string;
 }

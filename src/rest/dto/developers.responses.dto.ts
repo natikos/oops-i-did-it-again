@@ -3,15 +3,15 @@ import { IDeveloper } from '../../domain/developers/types';
 
 // @ApiModel()
 export class DeveloperDto implements IDeveloper {
-	// @ApiModelProperty()
-	id: string;
+  // @ApiModelProperty()
+  id: string;
 
-	// @ApiModelProperty()
-	firstName?: string;
+  // @ApiModelProperty()
+  firstName?: string;
 
-	// @ApiModelProperty()
-	lastName?: string;
+  // @ApiModelProperty()
+  lastName?: string;
 
-	// @ApiModelProperty()
-	email: string;
+  // @ApiModelProperty()
+  email: string;
 }
