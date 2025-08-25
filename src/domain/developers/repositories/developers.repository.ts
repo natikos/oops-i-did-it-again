@@ -3,22 +3,20 @@
 // **************************************************************************
 
 import { injectable } from 'inversify';
-import { IDeveloper } from '../types'
-import { contracts, developers } from './data'
+import { IDeveloper } from '../types';
+import { contracts, developers } from './data';
 
 @injectable()
 export class DevelopersRepository {
-
-	async getDevelopers(): Promise<IDeveloper[]>{
-		return developers
+	async getDevelopers(): Promise<IDeveloper[]> {
+		return developers;
 	}
 
-	async getDeveloperById(id: string): Promise<IDeveloper>{
-		return developers.find(d => d.id === id)
+	async getDeveloperById(id: string): Promise<IDeveloper> {
+		return developers.find((d) => d.id === id);
 	}
 
-	async getContracts(){
-		return contracts
+	async getContracts() {
+		return contracts;
 	}
-
 }
