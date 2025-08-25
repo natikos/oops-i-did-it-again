@@ -1,9 +1,0 @@
-node_modules
-build
-dist
-*.js
-*.d.ts
-coverage
-.env
-.env.local
-.env.*.local
