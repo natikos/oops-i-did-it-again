@@ -1,17 +1,19 @@
-// import { ApiModel, ApiModelProperty } from 'swagger-express-ts'
-import type { IDeveloper } from '../../domain/developers/types';
+import type { DeveloperWithRevenue } from '../../domain/developers/types';
 
-// @ApiModel()
-export class DeveloperDto implements IDeveloper {
-  // @ApiModelProperty()
-  id: string;
+export class DeveloperDto implements Omit<DeveloperWithRevenue, 'contracts'> {
+  id!: string;
+  firstName!: string;
+  lastName!: string;
+  email!: string;
+  revenue!: number;
 
-  // @ApiModelProperty()
-  firstName?: string;
-
-  // @ApiModelProperty()
-  lastName?: string;
-
-  // @ApiModelProperty()
-  email: string;
+  static fromDbDeveloper(dbDev: DeveloperWithRevenue): DeveloperDto {
+    const dto = new DeveloperDto();
+    dto.id = dbDev.id;
+    dto.firstName = dbDev.firstName;
+    dto.lastName = dbDev.lastName;
+    dto.email = dbDev.email;
+    dto.revenue = dbDev.revenue;
+    return dto;
+  }
 }

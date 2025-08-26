@@ -26,7 +26,7 @@ export default [
     rules: {
       ...typescript.configs.recommended.rules,
       ...prettierConfig.rules,
-      indent: ['error', 2],
+      'prefer-const': 'error',
       'prettier/prettier': 'error',
       'no-tabs': 'error',
       'no-mixed-spaces-and-tabs': 'error',

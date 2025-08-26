@@ -1,43 +1,44 @@
 import { Container } from 'inversify';
-import _ from 'lodash';
 
+import { CONTAINER_TYPES } from './types';
 import { DevelopersRepository } from '../domain/developers/repositories/developers.repository';
 import { DevelopersService } from '../domain/developers/services/developers.service';
 
-// REST API Controllers
-import '../rest/controllers/developers.controller';
+import type { AppContainer } from './types';
+import type { interfaces } from 'inversify';
 
-// Swagger Dto
+import '../rest/controllers/developers.controller';
 import '../rest/dto/developers.responses.dto';
 
-export const createContainer = (options: ICreateContainerOptions = {}) => {
-  let container = new Container();
+export const createContainer = (
+  options: CreateContainerOptions = {}
+): AppContainer => {
+  const container = new Container();
 
-  // Services
-  container.bind<DevelopersService>('DevelopersService').to(DevelopersService);
-
-  // Repositories
   container
-    .bind<DevelopersRepository>('DevelopersRepository')
+    .bind<DevelopersService>(CONTAINER_TYPES.DevelopersService)
+    .to(DevelopersService);
+  container
+    .bind<DevelopersRepository>(CONTAINER_TYPES.DevelopersRepository)
     .to(DevelopersRepository);
 
-  for (const serviceIdentifier of _.keys(options.overrides)) {
-    if (container.isBound(serviceIdentifier)) {
-      container.unbind(serviceIdentifier);
-    }
+  // for (const serviceIdentifier of _.keys(options.overrides)) {
+  //   if (container.isBound(serviceIdentifier)) {
+  //     container.unbind(serviceIdentifier);
+  //   }
 
-    if (options.overrides[serviceIdentifier].toConstantValue) {
-      container
-        .bind(serviceIdentifier)
-        .toConstantValue(options.overrides[serviceIdentifier].toConstantValue);
-    }
+  //   if (options.overrides[serviceIdentifier].toConstantValue) {
+  //     container
+  //       .bind(serviceIdentifier)
+  //       .toConstantValue(options.overrides[serviceIdentifier].toConstantValue);
+  //   }
 
-    if (options.overrides[serviceIdentifier].to) {
-      container
-        .bind(serviceIdentifier)
-        .to(options.overrides[serviceIdentifier].to);
-    }
-  }
+  //   if (options.overrides[serviceIdentifier].to) {
+  //     container
+  //       .bind(serviceIdentifier)
+  //       .to(options.overrides[serviceIdentifier].to);
+  //   }
+  // }
 
   const mergedContainer = options.mergeContainer
     ? Container.merge(container, options.mergeContainer)
@@ -50,18 +51,9 @@ export const createContainer = (options: ICreateContainerOptions = {}) => {
   return mergedContainer;
 };
 
-export const createContainerWithOverrides = (overrides: IContainerOverrides) =>
-  createContainer({ overrides });
-
-export type BindingType = 'to' | 'toConstantValue';
-export interface IContainerOverrides {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  [key: string]: { [key in BindingType]?: any };
-}
-
-export interface ICreateContainerOptions {
+export interface CreateContainerOptions {
   mergeContainer?: Container;
-  overrides?: IContainerOverrides;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  applicableMiddleware?: { apply: any };
+  applicableMiddleware?: {
+    apply(container: Container | interfaces.Container): void;
+  };
 }

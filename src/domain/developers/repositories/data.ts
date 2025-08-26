@@ -1,5 +1,3 @@
-import type { IDeveloper } from '../types';
-
 export const contracts = [
   {
     id: 1,
@@ -49,9 +47,9 @@ export const contracts = [
     status: 'ongoing',
     amount: 32000,
   },
-];
+] as const;
 
-export const developers: IDeveloper[] = [
+export const developers = [
   {
     id: '65de3467255f31cb84bd071d',
     email: 'Don_Quitzon@hotmail.com',
@@ -172,4 +170,4 @@ export const developers: IDeveloper[] = [
     firstName: 'Brandon',
     lastName: "D'Amore",
   },
-];
+] as const;

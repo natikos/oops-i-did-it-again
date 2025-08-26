@@ -1,0 +1,48 @@
+<html lang='en'>
+  <head>
+    <meta charset='UTF-8' />
+    <title>404 - Page Not Found</title>
+    <meta
+      name='viewport'
+      content='width=device-width, initial-scale=1, shrink-to-fit=no'
+    />
+
+    <style>
+      body {
+        background: #f8f9fa;
+      }
+      .error-container {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+      }
+      .error-code {
+        font-size: 8rem;
+        font-weight: bold;
+        color: #e74c3c;
+        margin-bottom: 1rem;
+      }
+      .error-message {
+        font-size: 2rem;
+        color: #343a40;
+        margin-bottom: 2rem;
+      }
+      .error-link {
+        font-size: 1.25rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class='error-container'>
+      <div class='error-code'>404</div>
+      <div class='error-message'>Sorry, the page you are looking for does not
+        exist.</div>
+      <a href='/api/developers' class='btn btn-primary error-link'>
+        <i class='fas fa-exclamation-triangle'></i>
+        Go back to Developers List
+      </a>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,15 @@
+{
+  "entryFile": "index.ts",
+  "noImplicitAdditionalProperties": "throw-on-extras",
+  "controllerPathGlobs": ["src/rest/controllers/**/*Controller.ts"],
+  "spec": {
+    "outputDirectory": "build/openapi",
+    "specVersion": 3,
+    "specFileBaseName": "openapi",
+    "yaml": true
+  },
+  "routes": {
+    "routesDir": "src/routes",
+    "middleware": "express"
+  }
+}

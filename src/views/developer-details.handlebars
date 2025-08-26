@@ -1,0 +1,64 @@
+<div class='container my-5'>
+  <div
+    class='card shadow p-4 mb-4 text-start'
+    style='max-width: 500px; margin: auto;'
+  >
+    <h2 class='mb-3'>Developer Details</h2>
+    {{#if developer}}
+      <ul class='list-group list-group-flush mb-3'>
+        <li class='list-group-item'><strong>ID:</strong> {{developer.id}}</li>
+        <li class='list-group-item'><strong>Name:</strong>
+          {{developer.firstName}}
+          {{developer.lastName}}</li>
+        <li class='list-group-item'><strong>Email:</strong>
+          {{developer.email}}</li>
+        <li class='list-group-item'><strong>Revenue ($):</strong>
+          {{formatMoney developer.revenue}}</li>
+      </ul>
+
+      <h4 class='mt-4 mb-2'>Contracts</h4>
+      {{#if developer.contracts}}
+        <table class='table table-bordered table-sm'>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Status</th>
+              <th>Amount ($)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{#each developer.contracts}}
+              <tr>
+                <td>{{this.id}}</td>
+                <td>
+                  {{#if (eq this.status 'pending')}}
+                    <span class='badge badge-warning'>Pending</span>
+                  {{else}}
+                    {{#if (eq this.status 'completed')}}
+                      <span class='badge badge-success'>Completed</span>
+                    {{else}}
+                      {{#if (eq this.status 'ongoing')}}
+                        <span class='badge badge-primary'>Ongoing</span>
+                      {{else}}
+                        <span
+                          class='badge badge-secondary'
+                        >{{this.status}}</span>
+                      {{/if}}
+                    {{/if}}
+                  {{/if}}
+                </td>
+                <td>{{formatMoney this.amount}}</td>
+              </tr>
+            {{/each}}
+          </tbody>
+        </table>
+      {{else}}
+        <div class='alert alert-info'>No contracts found for this developer.</div>
+      {{/if}}
+    {{else}}
+      <div class='alert alert-warning'>Developer not found.</div>
+    {{/if}}
+    <a href='/api/developers' class='btn btn-secondary mt-2'>Back to Developers
+      List</a>
+  </div>
+</div>
