@@ -1,10 +1,15 @@
-export interface IDeveloper {
+import type { contracts } from './repositories/data';
 
-	id: string
-
-	firstName?: string
-	lastName?: string
-
-	email: string
-
+export interface DbDeveloper {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  contracts: (typeof contracts)[number][];
 }
+
+export interface DeveloperWithRevenue extends DbDeveloper {
+  revenue: number;
+}
+
+export type DeveloperOverview = Omit<DeveloperWithRevenue, 'contracts'>;

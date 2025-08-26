@@ -1,64 +1,59 @@
-import { Container } from 'inversify'
-import _ from 'lodash'
+import { Container } from 'inversify';
 
-import { DevelopersService } from '../domain/developers/services/developers.service'
-import { DevelopersRepository } from '../domain/developers/repositories/developers.repository'
+import { CONTAINER_TYPES } from './types';
+import { DevelopersRepository } from '../domain/developers/repositories/developers.repository';
+import { DevelopersService } from '../domain/developers/services/developers.service';
 
-// REST API Controllers
-import '../rest/controllers/developers.controller'
+import type { AppContainer } from './types';
+import type { interfaces } from 'inversify';
 
-// Swagger Dto
-import '../rest/dto/developers.responses.dto'
+import '../rest/controllers/developers.controller';
+import '../rest/dto/developers.responses.dto';
 
-export const createContainer = (options: ICreateContainerOptions = {}) => {
+export const createContainer = (
+  options: CreateContainerOptions = {}
+): AppContainer => {
+  const container = new Container();
 
-	let container = new Container()
+  container
+    .bind<DevelopersService>(CONTAINER_TYPES.DevelopersService)
+    .to(DevelopersService);
+  container
+    .bind<DevelopersRepository>(CONTAINER_TYPES.DevelopersRepository)
+    .to(DevelopersRepository);
 
-	// Services
-	container.bind<DevelopersService>('DevelopersService').to(DevelopersService)
+  // for (const serviceIdentifier of _.keys(options.overrides)) {
+  //   if (container.isBound(serviceIdentifier)) {
+  //     container.unbind(serviceIdentifier);
+  //   }
 
-	// Repositories
-	container.bind<DevelopersRepository>('DevelopersRepository').to(DevelopersRepository)
+  //   if (options.overrides[serviceIdentifier].toConstantValue) {
+  //     container
+  //       .bind(serviceIdentifier)
+  //       .toConstantValue(options.overrides[serviceIdentifier].toConstantValue);
+  //   }
 
-	for( const serviceIdentifier of ( _.keys(options.overrides) ) ){
-		if( container.isBound(serviceIdentifier) ){
-			container.unbind(serviceIdentifier)
-		}
+  //   if (options.overrides[serviceIdentifier].to) {
+  //     container
+  //       .bind(serviceIdentifier)
+  //       .to(options.overrides[serviceIdentifier].to);
+  //   }
+  // }
 
-		if(options.overrides[serviceIdentifier].toConstantValue){
-			container.bind(serviceIdentifier).toConstantValue(options.overrides[serviceIdentifier].toConstantValue)
-		}
+  const mergedContainer = options.mergeContainer
+    ? Container.merge(container, options.mergeContainer)
+    : container;
 
-		if(options.overrides[serviceIdentifier].to){
-			container.bind(serviceIdentifier).to(options.overrides[serviceIdentifier].to)
-		}
+  if (options.applicableMiddleware?.apply) {
+    options.applicableMiddleware.apply(mergedContainer);
+  }
 
-	}
+  return mergedContainer;
+};
 
-	const mergedContainer = options.mergeContainer
-		? Container.merge(container, options.mergeContainer)
-		: container
-
-
-	if( options.applicableMiddleware?.apply ){
-		options.applicableMiddleware.apply(mergedContainer)
-	}
-
-
-	return mergedContainer
-
+export interface CreateContainerOptions {
+  mergeContainer?: Container;
+  applicableMiddleware?: {
+    apply(container: Container | interfaces.Container): void;
+  };
 }
-
-export const createContainerWithOverrides = (overrides: IContainerOverrides) => createContainer({ overrides })
-
-export type BindingType = 'to' | 'toConstantValue'
-export interface IContainerOverrides {
-	[key: string]: { [key in BindingType]? : any }
-}
-
-export interface ICreateContainerOptions {
-	mergeContainer?: Container,
-	overrides? : IContainerOverrides,
-	applicableMiddleware?: { apply: any }
-}
-

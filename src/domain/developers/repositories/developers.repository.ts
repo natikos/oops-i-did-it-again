@@ -3,22 +3,49 @@
 // **************************************************************************
 
 import { injectable } from 'inversify';
-import { IDeveloper } from '../types'
-import { contracts, developers } from './data'
+import _ from 'lodash';
+
+import { contracts, developers } from './data';
+
+import type { GetDevelopersFilters } from './types';
+import type { DbDeveloper } from '../types';
 
 @injectable()
 export class DevelopersRepository {
+  async getDevelopers(filters: GetDevelopersFilters): Promise<DbDeveloper[]> {
+    const contractsByDeveloper = _.groupBy(contracts, 'developerId');
 
-	async getDevelopers(): Promise<IDeveloper[]>{
-		return developers
-	}
+    const matchedDevelopers = developers.reduce<DbDeveloper[]>((acc, d) => {
+      const matchesName = filters.name
+        ? d.firstName.includes(filters.name) ||
+          d.lastName.includes(filters.name)
+        : true;
 
-	async getDeveloperById(id: string): Promise<IDeveloper>{
-		return developers.find(d => d.id === id)
-	}
+      const matchesEmail = filters.email
+        ? d.email.includes(filters.email)
+        : true;
 
-	async getContracts(){
-		return contracts
-	}
+      if (matchesName && matchesEmail) {
+        acc.push({ ...d, contracts: contractsByDeveloper[d.id] ?? [] });
+      }
+      return acc;
+    }, []);
 
+    return matchedDevelopers;
+  }
+
+  async getDeveloperById(id: string): Promise<DbDeveloper | null> {
+    const dev = developers.find((d) => d.id === id) ?? null;
+
+    if (!dev) {
+      return null;
+    }
+
+    const devContracts = contracts.filter((item) => item.developerId === id);
+    return { ...dev, contracts: devContracts };
+  }
+
+  async getContracts() {
+    return contracts;
+  }
 }

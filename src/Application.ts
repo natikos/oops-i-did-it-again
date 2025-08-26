@@ -1,103 +1,243 @@
-import 'reflect-metadata'
-import express from 'express'
-import bodyParser from 'body-parser'
-import { InversifyExpressServer } from 'inversify-express-utils'
-import { createContainer } from './container/container'
-import * as swagger from 'swagger-express-ts'
-import { generalDoc } from './rest/swagger/general.docs'
+import express from 'express';
 import { engine } from 'express-handlebars';
-import path from 'node:path'
-import { Express } from 'express-serve-static-core'
-import { Container, interfaces } from 'inversify'
+import helmet from 'helmet';
+import { InversifyExpressServer } from 'inversify-express-utils';
+import { exec } from 'node:child_process';
+import path from 'node:path';
+import 'reflect-metadata';
+import swaggerUI from 'swagger-ui-express';
+
+import { createContainer } from './container/container';
+import { CONTAINER_TYPES, type AppContainer } from './container/types';
+import swaggerDocument from '../build/openapi/openapi.json';
+
+import type { DevelopersService } from './domain/developers/services/developers.service';
+import type { NextFunction, Request, Response } from 'express';
+import type { Server } from 'node:http';
+
+export interface ApplicationOptions {
+  container?: AppContainer;
+  port?: number;
+  environment?: string;
+}
+
+interface CustomError extends Error {
+  statusCode?: number;
+  payload?: Record<string, unknown>;
+  code?: string | number;
+}
 
 export class Application {
+  private readonly container: AppContainer;
+  private readonly expressApp: express.Application;
+  private readonly options: ApplicationOptions;
+  private readonly DEFAULT_PORT = 3000;
 
-	private expressApp: Express
-	private inversifyServer: InversifyExpressServer
-	private container: Container | interfaces.Container
+  constructor(options: ApplicationOptions = {}) {
+    this.options = {
+      port: process.env.PORT ? +process.env.PORT : this.DEFAULT_PORT,
+      environment: process.env.NODE_ENV || 'development',
+      ...options,
+    };
 
-	constructor(options: IApplicationOptions = {}) {
-		this.container = options.container || null
-	}
+    this.container = options.container || createContainer();
+    this.expressApp = this.initExpressApp();
+  }
 
-	public async init(){
-		this.initContainer()
-		this.initExpressApp()
-	}
+  public get app(): express.Application {
+    if (!this.expressApp) {
+      throw new Error('Application is not initialized.');
+    }
+    return this.expressApp;
+  }
 
-	private initContainer(){
-		if( !this.container ){
-			this.container = createContainer()
-		}
-	}
+  public get appContainer(): AppContainer {
+    if (!this.container) {
+      throw new Error('Container is not initialized.');
+    }
+    return this.container;
+  }
 
-	private initExpressApp(){
-		const app = express()
-		app.all('*', (req, _res, next) => {
-			//@ts-ignore
-			req.container = this.container
-			next()
-		})
+  public async start(): Promise<void> {
+    const listenPort = this.options.port;
 
-		app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }))
-		app.use(bodyParser.json({ limit: '50mb' }))
-		app.engine('handlebars', engine());
-		app.set('view engine', 'handlebars');
-		app.set('views', path.resolve(__dirname + '/views'));
+    // Auto-generate Swagger
+    if (this.options.environment === 'development') {
+      exec('npx tsoa spec', (err, stdout, stderr) => {
+        if (err) {
+          console.error('Swagger generation error:', err);
+        }
 
-		this.inversifyServer = new InversifyExpressServer(this.container, null, null, app)
+        if (stdout) {
+          console.log(stdout);
+        }
 
-		this.inversifyServer
-			.setConfig(app => {
-				app.use('/api-docs/swagger', express.static('swagger'))
-				app.use('/api-docs/swagger/assets', express.static('node_modules/swagger-ui-dist'))
-				app.use(swagger.express(
-					{ definition: generalDoc }
-				))
-				app.get('/api-docs/swagger', (_req, res) => {
-					res.render('swagger')
-				})
-			})
-			.setErrorConfig(app => {
+        if (stderr) {
+          console.error(stderr);
+        }
+      });
+    }
 
-				app.use((e, _req, res, _next) => {
+    return new Promise((resolve, reject) => {
+      const server = this.expressApp.listen(listenPort, (err?: Error) => {
+        if (err) {
+          reject(err);
+        } else {
+          console.log(
+            `🚀 Server running on port ${listenPort} in ${this.options.environment} mode`
+          );
+          resolve();
+        }
+      });
 
-					res.status(e.statusCode || 500).json({
-						error: {
-							name: e.name || 'Internal server error',
-							message: e.message,
-							stack: e.stack,
-							payload: e.payload,
-							code: e.code,
-						}
-					})
-				})
-			})
-			.build()
+      this.gracefulShutdown(server);
+    });
+  }
 
-		app.get('*', (_req, res) => {
-			res.render('404')
-		})
+  private initExpressApp(): express.Application {
+    const baseApp = express();
 
-		this.expressApp = app
+    this.configureMiddleware(baseApp);
+    this.configureViewEngine(baseApp);
 
-	}
+    const server = new InversifyExpressServer(
+      this.container,
+      null,
+      null,
+      baseApp
+    );
 
-	public listen(...args){
-		this.expressApp.listen(...args)
-	}
+    const builtApp = server
+      .setConfig(this.configureRoutes.bind(this))
+      .setErrorConfig(this.configureErrorHandling.bind(this))
+      .build();
 
-	public getExpressApp(){
-		return this.expressApp
-	}
+    this.configureSwaggerDocs(builtApp);
+    this.configure404Handler(builtApp);
 
-	public getContainer(){
-		return this.container
-	}
+    return builtApp;
+  }
 
+  private configureMiddleware(app: express.Application): void {
+    app.use(helmet({ contentSecurityPolicy: false }));
+    app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+    app.use(express.json({ limit: '50mb' }));
+  }
+
+  private configureViewEngine(app: express.Application): void {
+    app.engine(
+      'handlebars',
+      engine({
+        helpers: {
+          eq: (a: unknown, b: unknown) => a === b,
+          formatMoney: (amount: number) => {
+            if (typeof amount !== 'number') return amount;
+
+            return new Intl.NumberFormat('en-US', {
+              style: 'currency',
+              currency: 'USD',
+            }).format(amount);
+          },
+        },
+      })
+    );
+    app.set('view engine', 'handlebars');
+    app.set('views', path.join(__dirname, 'views'));
+  }
+
+  private configureRoutes(app: express.Application): void {
+    app.get('/developers/:id', async (req, res) => {
+      console.log(req.params.id);
+      const service = this.container.get<DevelopersService>(
+        CONTAINER_TYPES.DevelopersService
+      );
+
+      const data = await service.getDeveloperById(req.params.id);
+      res.render('developer-details', {
+        layout: 'main',
+        developer: data,
+      });
+    });
+
+    app.get('/developers', async (req, res) => {
+      const service = this.container.get<DevelopersService>(
+        CONTAINER_TYPES.DevelopersService
+      );
+
+      const data = await service.getDevelopers({
+        name: req.query.name as string,
+        email: req.query.email as string,
+      });
+
+      res.render('developers', {
+        layout: 'main',
+        developers: data,
+      });
+    });
+  }
+
+  private configureSwaggerDocs(app: express.Application): void {
+    app.use('/api-docs', swaggerUI.serve);
+    app.get('/api-docs', swaggerUI.setup(swaggerDocument));
+  }
+
+  private configureErrorHandling(app: express.Application): void {
+    app.use(this.handleErrors.bind(this));
+  }
+
+  private configure404Handler(app: express.Application): void {
+    app.use((_req, res) => {
+      res.render('404', { layout: 'main' });
+    });
+  }
+
+  private handleErrors(
+    err: CustomError,
+    _req: Request,
+    res: Response,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _next: NextFunction
+  ): void {
+    if (this.options.environment === 'development') {
+      console.error('Application Error:', err);
+    }
+
+    if (!(err instanceof Error)) {
+      err = new Error(String(err)) as CustomError;
+    }
+
+    const statusCode = err.statusCode || 500;
+    const isProduction = this.options.environment === 'production';
+
+    const errorResponse = {
+      error: {
+        name: err.name || 'InternalServerError',
+        message: err.message || 'Unexpected error',
+        ...(err.payload && { payload: err.payload }),
+        ...(err.code && { code: err.code }),
+        ...(!isProduction && err.stack && { stack: err.stack }),
+        timestamp: new Date().toISOString(),
+      },
+    };
+
+    res.status(statusCode).json(errorResponse);
+  }
+
+  private async gracefulShutdown(server: Server) {
+    process.on('SIGTERM', () => {
+      console.log('SIGTERM received, shutting down gracefully...');
+      server.close(() => {
+        console.log('Server closed');
+        process.exit(0);
+      });
+    });
+
+    process.on('SIGINT', () => {
+      console.log('SIGINT received, shutting down gracefully...');
+      server.close(() => {
+        console.log('Server closed');
+        process.exit(0);
+      });
+    });
+  }
 }
-
-export interface IApplicationOptions {
-	container?: any
-}
-
