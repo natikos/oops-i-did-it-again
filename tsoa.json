@@ -6,7 +6,7 @@
     "outputDirectory": "build/openapi",
     "specVersion": 3,
     "specFileBaseName": "openapi",
-    "yaml": true
+    "yaml": false
   },
   "routes": {
     "routesDir": "src/routes",

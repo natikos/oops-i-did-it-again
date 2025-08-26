@@ -5,9 +5,11 @@ import { InversifyExpressServer } from 'inversify-express-utils';
 import { exec } from 'node:child_process';
 import path from 'node:path';
 import 'reflect-metadata';
+import swaggerUI from 'swagger-ui-express';
 
 import { createContainer } from './container/container';
 import { CONTAINER_TYPES, type AppContainer } from './container/types';
+import swaggerDocument from '../build/openapi/openapi.json';
 
 import type { DevelopersService } from './domain/developers/services/developers.service';
 import type { NextFunction, Request, Response } from 'express';
@@ -110,6 +112,7 @@ export class Application {
       .setErrorConfig(this.configureErrorHandling.bind(this))
       .build();
 
+    this.configureSwaggerDocs(builtApp);
     this.configure404Handler(builtApp);
 
     return builtApp;
@@ -171,8 +174,11 @@ export class Application {
         developers: data,
       });
     });
+  }
 
-    // TODO: add swagger
+  private configureSwaggerDocs(app: express.Application): void {
+    app.use('/api-docs', swaggerUI.serve);
+    app.get('/api-docs', swaggerUI.setup(swaggerDocument));
   }
 
   private configureErrorHandling(app: express.Application): void {
