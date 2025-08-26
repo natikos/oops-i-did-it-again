@@ -36,9 +36,11 @@ export class DevelopersRepository {
 
   async getDeveloperById(id: string): Promise<DbDeveloper | null> {
     const dev = developers.find((d) => d.id === id) ?? null;
+
     if (!dev) {
       return null;
     }
+
     const devContracts = contracts.filter((item) => item.developerId === id);
     return { ...dev, contracts: devContracts };
   }

@@ -7,8 +7,9 @@ import path from 'node:path';
 import 'reflect-metadata';
 
 import { createContainer } from './container/container';
-import { type AppContainer } from './container/types';
+import { CONTAINER_TYPES, type AppContainer } from './container/types';
 
+import type { DevelopersService } from './domain/developers/services/developers.service';
 import type { NextFunction, Request, Response } from 'express';
 import type { Server } from 'node:http';
 
@@ -142,12 +143,36 @@ export class Application {
   }
 
   private configureRoutes(app: express.Application): void {
-    app.use('/api-docs', express.static(path.join(process.cwd(), 'swagger')));
-    app.use(
-      '/api-docs/assets',
-      express.static(path.join(process.cwd(), 'node_modules/swagger-ui-dist'))
-    );
-    app.get('/api-docs', this.handleSwaggerDocs.bind(this));
+    app.get('/developers/:id', async (req, res) => {
+      console.log(req.params.id);
+      const service = this.container.get<DevelopersService>(
+        CONTAINER_TYPES.DevelopersService
+      );
+
+      const data = await service.getDeveloperById(req.params.id);
+      res.render('developer-details', {
+        layout: 'main',
+        developer: data,
+      });
+    });
+
+    app.get('/developers', async (req, res) => {
+      const service = this.container.get<DevelopersService>(
+        CONTAINER_TYPES.DevelopersService
+      );
+
+      const data = await service.getDevelopers({
+        name: req.query.name as string,
+        email: req.query.email as string,
+      });
+
+      res.render('developers', {
+        layout: 'main',
+        developers: data,
+      });
+    });
+
+    // TODO: add swagger
   }
 
   private configureErrorHandling(app: express.Application): void {
@@ -158,10 +183,6 @@ export class Application {
     app.use((_req, res) => {
       res.render('404', { layout: 'main' });
     });
-  }
-
-  private handleSwaggerDocs(_req: Request, res: Response): void {
-    res.render('swagger', { layout: 'main' });
   }
 
   private handleErrors(

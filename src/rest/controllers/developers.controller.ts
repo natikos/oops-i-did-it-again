@@ -3,19 +3,20 @@ import {
   BaseHttpController,
   controller,
   httpGet,
+  queryParam,
   requestParam,
 } from 'inversify-express-utils';
-import { Get, Query, Res, Route } from 'tsoa';
+import { Get, Query, Route } from 'tsoa';
 
 import { CONTAINER_TYPES } from '../../container/types';
-import { DeveloperDto } from '../dto/developers.responses.dto';
 
 import type { DevelopersService } from '../../domain/developers/services/developers.service';
-import type { Response } from 'express';
+import type { DeveloperDetailsDto } from '../dto/developer.responses.dto';
+import type { DeveloperDto } from '../dto/developers.responses.dto';
 import type { interfaces } from 'inversify-express-utils';
 
-@Route('developers')
 @controller('/api/developers')
+@Route('/api/developers')
 export class DevelopersController
   extends BaseHttpController
   implements interfaces.Controller
@@ -30,27 +31,21 @@ export class DevelopersController
   @Get('/')
   @httpGet('/')
   public async getDevelopers(
-    @Res() res: Response,
-    @Query() email?: string,
-    @Query() name?: string
-  ): Promise<void> {
-    const data = await this.developersService.getDevelopers({ email, name });
-    res.render('developers', {
-      layout: 'main',
-      developers: data.map(DeveloperDto.fromDbDeveloper),
-    });
+    @Query('email')
+    @queryParam('email')
+    email?: string,
+    @Query('name')
+    @queryParam('name')
+    name?: string
+  ): Promise<DeveloperDto[]> {
+    return this.developersService.getDevelopers({ email, name });
   }
 
   @Get('{id}')
-  @httpGet('/:id')
+  @httpGet(':id')
   public async getDeveloperById(
-    @requestParam('id') id: string,
-    @Res() res: Response
-  ): Promise<void> {
-    const data = await this.developersService.getDeveloperById(id);
-    res.render('developer-details', {
-      layout: 'main',
-      developer: data,
-    });
+    @requestParam('id') id: string
+  ): Promise<DeveloperDetailsDto | null> {
+    return this.developersService.getDeveloperById(id);
   }
 }

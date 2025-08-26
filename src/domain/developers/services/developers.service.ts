@@ -2,11 +2,12 @@ import { inject, injectable } from 'inversify';
 import _ from 'lodash';
 
 import { CONTAINER_TYPES } from '../../../container/types';
+import { DeveloperDto } from '../../../rest/dto/developers.responses.dto';
 
+import type { DeveloperDetailsDto } from '../../../rest/dto/developer.responses.dto';
 import type { contracts } from '../repositories/data';
 import type { DevelopersRepository } from '../repositories/developers.repository';
 import type { GetDevelopersFilters } from '../repositories/types';
-import type { DeveloperOverview, DeveloperWithRevenue } from '../types';
 
 @injectable()
 export class DevelopersService {
@@ -15,18 +16,17 @@ export class DevelopersService {
     private developersRepository: DevelopersRepository
   ) {}
 
-  async getDevelopers(
-    filter: GetDevelopersFilters
-  ): Promise<DeveloperOverview[]> {
+  async getDevelopers(filter: GetDevelopersFilters): Promise<DeveloperDto[]> {
     const devs = await this.developersRepository.getDevelopers(filter);
-
-    return devs.map(({ contracts, ...dev }) => ({
-      ...dev,
-      revenue: this.calculateRevenue(contracts),
-    }));
+    return devs.map(({ contracts, ...dev }) =>
+      DeveloperDto.fromDbDeveloper({
+        ...dev,
+        revenue: this.calculateRevenue(contracts),
+      })
+    );
   }
 
-  async getDeveloperById(id: string): Promise<DeveloperWithRevenue | null> {
+  async getDeveloperById(id: string): Promise<DeveloperDetailsDto | null> {
     const dev = await this.developersRepository.getDeveloperById(id);
 
     if (!dev) {
