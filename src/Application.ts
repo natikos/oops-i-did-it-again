@@ -2,7 +2,7 @@ import express from 'express';
 import { engine } from 'express-handlebars';
 import helmet from 'helmet';
 import { InversifyExpressServer } from 'inversify-express-utils';
-// import { exec } from 'node:child_process';
+import { exec } from 'node:child_process';
 import path from 'node:path';
 import 'reflect-metadata';
 
@@ -59,21 +59,21 @@ export class Application {
     const listenPort = this.options.port;
 
     // Auto-generate Swagger
-    // if (this.options.environment === 'development') {
-    //   exec('npx tsoa spec', (err, stdout, stderr) => {
-    //     if (err) {
-    //       console.error('Swagger generation error:', err);
-    //     }
+    if (this.options.environment === 'development') {
+      exec('npx tsoa spec', (err, stdout, stderr) => {
+        if (err) {
+          console.error('Swagger generation error:', err);
+        }
 
-    //     if (stdout) {
-    //       console.log(stdout);
-    //     }
+        if (stdout) {
+          console.log(stdout);
+        }
 
-    //     if (stderr) {
-    //       console.error(stderr);
-    //     }
-    //   });
-    // }
+        if (stderr) {
+          console.error(stderr);
+        }
+      });
+    }
 
     return new Promise((resolve, reject) => {
       const server = this.expressApp.listen(listenPort, (err?: Error) => {

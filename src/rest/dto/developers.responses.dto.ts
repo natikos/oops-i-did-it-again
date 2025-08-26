@@ -1,4 +1,7 @@
-import type { DeveloperWithRevenue } from '../../domain/developers/types';
+import type {
+  DeveloperOverview,
+  DeveloperWithRevenue,
+} from '../../domain/developers/types';
 
 export class DeveloperDto implements Omit<DeveloperWithRevenue, 'contracts'> {
   id!: string;
@@ -7,7 +10,7 @@ export class DeveloperDto implements Omit<DeveloperWithRevenue, 'contracts'> {
   email!: string;
   revenue!: number;
 
-  static fromDbDeveloper(dbDev: DeveloperWithRevenue): DeveloperDto {
+  static fromDbDeveloper(dbDev: DeveloperOverview): DeveloperDto {
     const dto = new DeveloperDto();
     dto.id = dbDev.id;
     dto.firstName = dbDev.firstName;

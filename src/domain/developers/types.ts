@@ -11,3 +11,5 @@ export interface DbDeveloper {
 export interface DeveloperWithRevenue extends DbDeveloper {
   revenue: number;
 }
+
+export type DeveloperOverview = Omit<DeveloperWithRevenue, 'contracts'>;

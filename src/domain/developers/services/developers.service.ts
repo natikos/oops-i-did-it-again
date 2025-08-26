@@ -6,7 +6,7 @@ import { CONTAINER_TYPES } from '../../../container/types';
 import type { contracts } from '../repositories/data';
 import type { DevelopersRepository } from '../repositories/developers.repository';
 import type { GetDevelopersFilters } from '../repositories/types';
-import type { DeveloperWithRevenue } from '../types';
+import type { DeveloperOverview, DeveloperWithRevenue } from '../types';
 
 @injectable()
 export class DevelopersService {
@@ -17,12 +17,12 @@ export class DevelopersService {
 
   async getDevelopers(
     filter: GetDevelopersFilters
-  ): Promise<DeveloperWithRevenue[]> {
+  ): Promise<DeveloperOverview[]> {
     const devs = await this.developersRepository.getDevelopers(filter);
 
-    return devs.map((dev) => ({
+    return devs.map(({ contracts, ...dev }) => ({
       ...dev,
-      revenue: this.calculateRevenue(dev.contracts),
+      revenue: this.calculateRevenue(contracts),
     }));
   }
 
